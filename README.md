@@ -172,3 +172,101 @@
        - Pour des applications à fort trafic, il est courant d'utiliser des techniques comme le **caching**, les **WebSockets** ou le **long-polling** pour réduire le nombre de connexions HTTP nécessaires et améliorer l'efficacité.
 
     En conclusion, bien que chaque appel HTTP soit indépendant, il est crucial de concevoir l'architecture du système pour gérer efficacement les connexions afin d'éviter une surcharge réseau et CPU lorsque le nombre d'utilisateurs augmente.
+
+
+
+# Questions Limites
+## Structure du code et organisation
+- **Si l’API grossit, peut-on continuer à garder tout dans un seul fichier Python ?**
+
+      Non, il n'est pas recommandé de garder tout dans un seul fichier Python lorsque l'API grossit. Voici quelques raisons et meilleures pratiques :
+   
+      1. **Lisibilité et maintenabilité** : Un seul fichier contenant tout le code rend la lecture et la compréhension du code difficile. En divisant le code en plusieurs fichiers ou modules, on améliore la lisibilité et la maintenabilité.
+   
+      2. **Modularité** : En séparant les différentes parties de l'application (par exemple, les routes, les modèles de données, les contrôleurs), on peut mieux organiser le code et faciliter les modifications futures.
+   
+      3. **Tests unitaires** : Avoir un code bien structuré permet d'écrire des tests unitaires plus facilement. On peut tester chaque module indépendamment, ce qui améliore la qualité du code.
+   
+      4. **Collaboration** : Dans un environnement de développement collaboratif, avoir un seul fichier rend difficile le travail en équipe. En divisant le code en modules, plusieurs développeurs peuvent travailler simultanément sur différentes parties de l'application sans conflit.
+   
+      5. **Scalabilité** : À mesure que l'application grandit, il devient essentiel d'avoir une architecture modulaire pour faciliter l'ajout de nouvelles fonctionnalités sans alourdir le code existant.
+   
+      En résumé, il est préférable d'adopter une architecture modulaire dès le début du développement de l'API pour garantir sa lisibilité, sa maintenabilité et sa scalabilité à long terme.
+
+- **Peut-on regrouper les routes par thème (utilisateurs, messages, canaux) dans des fichiers séparés ?**  
+      Oui et il est même recommandé de regrouper les routes par thème dans des fichiers séparés. Voici quelques avantages de cette approche :
+      1. **Organisation du code** : En regroupant les routes par thème, on crée une structure claire et logique pour le code. Cela facilite la navigation dans le projet et permet de trouver rapidement les routes associées à un thème spécifique (par exemple, utilisateurs, messages, canaux).
+      2. **Modularité** : Chaque fichier peut être considéré comme un module indépendant
+      3. **Réutilisabilité** : Si certaines routes ou logiques sont communes à plusieurs parties de l'application, les regrouper dans des fichiers séparés permet de les réutiliser facilement sans duplication de code.
+      ...
+
+- **Quels seraient les avantages d’avoir un fichier user_api.py, un message_api.py,etc. ?**
+
+      Avoir des fichiers séparés comme `user_api.py`, `message_api.py`, etc. présente plusieurs avantages :
+      
+      1. **Clarté et lisibilité** : Chaque fichier se concentre sur un aspect spécifique de l'application, ce qui rend le code plus facile à lire et à comprendre. Les développeurs peuvent rapidement identifier où se trouvent les routes et la logique associée à chaque thème.
+      
+      2. **Facilité de maintenance** : Lorsqu'une fonctionnalité doit être modifiée ou mise à jour, il est plus simple de localiser le fichier concerné. Cela réduit le risque d'introduire des erreurs dans d'autres parties du code.
+      
+      3. **Collaboration améliorée** : Dans un environnement de développement collaboratif, plusieurs développeurs peuvent travailler simultanément sur différentes parties de l'application sans conflit. Par exemple, un développeur peut travailler sur les utilisateurs pendant qu'un autre travaille sur les messages.
+      
+      4. **Tests unitaires simplifiés** : En ayant des fichiers séparés, il devient plus facile d'écrire des tests unitaires pour chaque module. On peut tester les routes et la logique associées à chaque thème indépendamment.
+      
+      5. **Scalabilité** : À mesure que l'application grandit, il est plus facile d'ajouter de nouvelles fonctionnalités ou de modifier les existantes si le code est bien structuré en modules distincts.
+      
+      En résumé, regrouper les routes par thème dans des fichiers séparés améliore la structure du code, facilite la maintenance et la collaboration, et permet une meilleure évolutivité de l'application.
+
+
+- **Comment tester uniquement la logique des pseudos sans lancer tout le serveur ?**
+      Pour tester uniquement la logique des pseudos sans lancer tout le serveur, on peut adopter plusieurs approches :
+
+      1. **Tests unitaires** : Écrire des tests unitaires pour les fonctions ou classes qui gèrent la logique des pseudos. Utiliser un framework de test comme `unittest` ou `pytest` permet de créer des tests isolés qui vérifient le comportement attendu sans avoir besoin de démarrer le serveur.
+      
+      2. **Mocking** : Utiliser des bibliothèques de mocking (comme `unittest.mock`) pour simuler les dépendances externes (par exemple, la base de données ou les services externes) afin de tester la logique des pseudos de manière isolée.
+      
+      3. **Scripts de test** : Créer des scripts Python dédiés qui importent les fonctions ou classes liées aux pseudos et exécutent des tests spécifiques. Cela permet de vérifier le comportement sans avoir à lancer l'ensemble du serveur.
+      
+      4. **Environnement de test** : Configurer un environnement de test léger qui ne démarre que les composants nécessaires pour tester la logique des pseudos, sans charger l'ensemble de l'application.
+      
+      En utilisant ces techniques, on peut s'assurer que la logique des pseudos est correctement testée et validée sans nécessiter le lancement complet du serveur.
+
+
+- **Peut-on documenter automatiquement une API répartie dans plusieurs fichiers ?**
+      Oui, il est possible de documenter automatiquement une API répartie dans plusieurs fichiers. Voici quelques approches pour y parvenir :
+
+      1. **Utilisation de docstrings** : En ajoutant des docstrings aux fonctions et classes dans chaque fichier, on peut fournir des descriptions claires de ce que fait chaque route ou méthode. Des outils comme Sphinx ou pydoc peuvent ensuite extraire ces docstrings pour générer une documentation structurée.
+
+      2. **Frameworks de documentation d'API** : Des frameworks comme Swagger (OpenAPI) ou FastAPI permettent de documenter automatiquement les routes d'une API. Ils peuvent analyser les fichiers Python pour générer une documentation interactive basée sur les annotations et les docstrings.
+
+      3. **Annotations de type** : En utilisant des annotations de type (type hints) dans le code, on peut fournir des informations supplémentaires sur les paramètres et les retours des fonctions. Cela améliore la clarté de la documentation générée automatiquement.
+
+      4. **Fichiers de configuration** : Certains outils permettent de configurer la documentation en utilisant des fichiers YAML ou JSON, où l'on peut spécifier les routes, les paramètres, et les réponses attendues. Ces fichiers peuvent être maintenus séparément tout en étant liés aux différents modules de l'API.
+
+      En combinant ces techniques, on peut créer une documentation complète et cohérente pour une API répartie sur plusieurs fichiers, facilitant ainsi la compréhension et l'utilisation de l'API par les développeurs.
+
+
+## Isolation des responsabilités
+
+-**Que se passerait-il si l’on voulait remplacer uniquement la gestion des pseudos ? Ou l’externaliser ?**  
+
+      Si on a bien isolé la gestion des pseudos dans un module ou une classe distincte, il serait relativement facile de remplacer ou d'externaliser cette fonctionnalité.
+
+-**Est-il possible d’utiliser la même API d’authentification dans une autre application CanaDuck ?**  
+
+      Oui, si l'API d'authentification est bien conçue et isolée, elle peut être réutilisée dans d'autres applications CanaDuck.
+
+
+-**Quels composants doivent absolument partager des données pour fonctionner ?**
+      Les composants qui doivent absolument partager des données pour fonctionner incluent :
+      
+      1. **Gestion des utilisateurs** : Les informations sur les utilisateurs (comme les pseudos, les identifiants, etc.) doivent être partagées entre les composants d'authentification et de gestion des canaux/messages.
+      
+      2. **Canaux** : Les informations sur les canaux (comme les noms, les membres, etc.) doivent être accessibles aux composants de gestion des messages et d'authentification.
+      
+      3. **Messages** : Les messages envoyés dans un canal doivent être accessibles aux composants de gestion des canaux et d'authentification pour afficher correctement l'historique des messages et les notifications.
+      
+      En isolant ces composants tout en permettant le partage de données nécessaires, on peut garantir une architecture modulaire et maintenable.
+
+
+-**Peut-on définir des frontières entre composants indépendants (par fonction, par équipe, par métier) ?**
+

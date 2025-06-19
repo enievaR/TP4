@@ -248,25 +248,82 @@
 ## Isolation des responsabilités
 
 -**Que se passerait-il si l’on voulait remplacer uniquement la gestion des pseudos ? Ou l’externaliser ?**  
-
-      Si on a bien isolé la gestion des pseudos dans un module ou une classe distincte, il serait relativement facile de remplacer ou d'externaliser cette fonctionnalité.
+    Si on a bien isolé la gestion des pseudos dans un module ou une classe distincte, il serait relativement facile de remplacer ou d'externaliser cette fonctionnalité.
 
 -**Est-il possible d’utiliser la même API d’authentification dans une autre application CanaDuck ?**  
 
-      Oui, si l'API d'authentification est bien conçue et isolée, elle peut être réutilisée dans d'autres applications CanaDuck.
+    Oui, si l'API d'authentification est bien conçue et isolée, elle peut être réutilisée dans d'autres applications CanaDuck.
 
 
 -**Quels composants doivent absolument partager des données pour fonctionner ?**
-      Les composants qui doivent absolument partager des données pour fonctionner incluent :
+    Les composants qui doivent absolument partager des données pour fonctionner incluent :
       
-      1. **Gestion des utilisateurs** : Les informations sur les utilisateurs (comme les pseudos, les identifiants, etc.) doivent être partagées entre les composants d'authentification et de gestion des canaux/messages.
+    1. **Gestion des utilisateurs** : Les informations sur les utilisateurs (comme les pseudos, les identifiants, etc.) doivent être partagées entre les composants d'authentification et de gestion des canaux/messages.
       
-      2. **Canaux** : Les informations sur les canaux (comme les noms, les membres, etc.) doivent être accessibles aux composants de gestion des messages et d'authentification.
+    2. **Canaux** : Les informations sur les canaux (comme les noms, les membres, etc.) doivent être accessibles aux composants de gestion des messages et d'authentification.
       
-      3. **Messages** : Les messages envoyés dans un canal doivent être accessibles aux composants de gestion des canaux et d'authentification pour afficher correctement l'historique des messages et les notifications.
+    3. **Messages** : Les messages envoyés dans un canal doivent être accessibles aux composants de gestion des canaux et d'authentification pour afficher correctement l'historique des messages et les notifications.
       
-      En isolant ces composants tout en permettant le partage de données nécessaires, on peut garantir une architecture modulaire et maintenable.
+    En isolant ces composants tout en permettant le partage de données nécessaires, on peut garantir une architecture modulaire et maintenable.
 
 
 -**Peut-on définir des frontières entre composants indépendants (par fonction, par équipe, par métier) ?**
 
+    Oui, on peut définir assez facilement des frontières entre composants indépendants en fonction de la fonction, de l'équipe ou du métier. Il suffit de structurer l'API de manière modulaire, en créant des modules ou des services distincts pour chaque fonctionnalité ou domaine métier.
+
+
+-**Comment éviter que deux composants interdépendants deviennent un nouveau monolithe caché ?**
+    Pour cela on peut adopter des interfaces claires et des contrats entre les composants.
+
+## Déplouement et scalabilité
+-**Est-ce qu’on pourrait lancer la gestion des utilisateurs sur un autre port ? Dans un autre fichier ?**
+
+    PAs avec ce qu'on a acutellement, mais si on isole la gestion des utilisateurs dans un module ou un service distinct, il serait possible de le lancer sur un autre port ou dans un autre fichier. Cela permettrait de séparer les responsabilités et de faciliter la scalabilité de l'application.
+
+-**Quels bénéfices à déployer un composant critique (/msg) sur deux serveurs ?**
+    Déployer un composant critique comme `/msg` sur deux serveurs présente plusieurs bénéfices :
+
+    1. **Haute disponibilité** : En cas de défaillance d'un serveur, l'autre serveur peut continuer à traiter les requêtes, garantissant ainsi que le service reste disponible pour les utilisateurs.
+
+    2. **Scalabilité** : En répartissant la charge entre deux serveurs, on peut gérer un plus grand nombre de requêtes simultanées, améliorant ainsi les performances et la réactivité de l'application.
+
+    3. **Redondance** : Avoir deux instances du même composant permet de minimiser les risques de perte de données ou d'indisponibilité en cas de panne matérielle ou logicielle.
+
+    4. **Maintenance simplifiée** : Lorsqu'une instance doit être mise à jour ou maintenue, l'autre instance peut continuer à fonctionner, permettant une maintenance sans interruption du service.
+
+    En résumé, déployer un composant critique sur deux serveurs améliore la résilience, la performance et la fiabilité de l'application.
+
+-**Peut-on mettre à jour une partie du code sans relancer toute l’application ?**-
+    si l'architecture est conçue de manière modulaire, il est possible de mettre à jour une partie du code sans relancer toute l'application, c'est un peu le but du microservice.
+
+-**Si on veut créer une version mobile de l’application, quels morceaux garderait-on ? Réécrirait-on ?**
+
+    On pourrait réutilisé certaine partie qui communique avec la base de données, mais la partie front-end serait probablement réécrite pour s'adapter aux spécificités des applications mobiles. Les API backend pourraient rester les mêmes, mais l'interface utilisateur et l'expérience utilisateur seraient adaptées pour les appareils mobiles.
+
+-**Quels outils pourraient aider à orchestrer plusieurs services (Docker, Compose, autre) ?**
+    On utiliserait majoritairement Docker pour créer des environnement stable et unique pour chaque service, et Docker Compose pour orchestrer plusieurs conteneurs. D'autres outils comme Kubernetes peuvent également être utilisés pour gérer des déploiements plus complexes et assurer la scalabilité des services.
+
+## Communication et cohérence
+
+-**Si on découpe les services, comment vont-ils discuter entre eux ?**
+    Si on découpe les services, ils peuvent discuter entre eux via des API RESTful, des WebSockets pour une communication en temps réel. Chaque service peut exposer ses propres endpoints API, et les autres services peuvent les consommer pour échanger des données.
+
+-**Que devient l’état partagé (ex : liste des pseudos connectés) si chaque service a sa propre mémoire ?**
+    Si chaque service a sa propre mémoire, l'état partagé (comme la liste des pseudos connectés) doit être géré de manière centralisée. Cela peut être réalisé en utilisant une base de données partagée pour stocker les informations communes. Les services peuvent alors interagir avec cette base de données ou ce cache pour récupérer et mettre à jour l'état partagé.
+
+-**Faut-il stocker certaines informations dans une base commune ? Dans une file de messages ?**
+    Oui, il est souvent nécessaire de stocker certaines informations dans une base commune pour garantir la cohérence des données entre les services. Par exemple, les informations sur les utilisateurs, les canaux et les messages peuvent être stockées dans une base de données partagée.
+
+-**Comment gérer les erreurs si un service est indisponible ? Les autres doivent-ils attendre ? Réessayer ?**
+    Si un service est indisponible, les autres services peuvent adopter plusieurs stratégies pour gérer les erreurs :
+
+    1. **Réessayer** : Implémenter une logique de réessai avec des délais exponentiels pour tenter de se reconnecter au service indisponible après un certain temps.
+
+    2. **Retour d'erreur** : Si le service est critique, renvoyer une erreur aux clients et leur indiquer de réessayer plus tard. Cela permet de ne pas bloquer les autres services.
+
+    3. **Fallback** : Implémenter une logique de secours qui permet aux services de continuer à fonctionner avec des données obsolètes ou par défaut si le service n'est pas disponible.
+
+    En résumé, il est important de concevoir des mécanismes de résilience pour gérer les erreurs et garantir que l'application reste fonctionnelle même en cas d'indisponibilité d'un service.
+
+-**Peut-on garantir la cohérence globale sans que chaque service connaisse les autres ?**
+    Il est difficile de garantir la cohérence globale sans que chaque service connaisse les autres, car cela nécessite une certaine forme de communication ou de coordination entre les services.
